@@ -19,22 +19,22 @@ import javax.ws.rs.core.Response.Status;
 
 import com.google.gson.Gson;
 
-
 @Path("/utils")
-@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8") 
+@Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class ComputationResource {
 
-	private static final Logger LOG = Logger.getLogger(ComputationResource.class.getName()); 
+	private static final Logger LOG = Logger.getLogger(ComputationResource.class.getName());
 	private final Gson g = new Gson();
 
 	private static final DateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSZ");
 
-	public ComputationResource() {} //nothing to be done here @GET
+	public ComputationResource() {
+	} // nothing to be done here @GET
 
 	@GET
 	@Path("/hello")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response hello() throws IOException{
+	public Response hello() throws IOException {
 		try {
 			throw new IOException("UPS");
 		} catch (Exception e) {
@@ -42,15 +42,15 @@ public class ComputationResource {
 			return Response.temporaryRedirect(URI.create("/error/500.html")).build();
 		}
 	}
-	
+
 	@GET
 	@Path("/time")
 	public Response getCurrentTime(@CookieParam("session::apdc") Cookie cookie) {
-		if(!LoginResource.checkPermissions(cookie, LoginResource.ADMIN)) {
+		if (!LoginResource.checkPermissions(cookie, LoginResource.ADMIN)) {
 			return Response.status(Status.FORBIDDEN).entity("Incorrect username or password.").build();
 		}
-		
+
 		return Response.ok().entity(g.toJson(fmt.format(new Date()))).build();
 	}
-	
+
 }
