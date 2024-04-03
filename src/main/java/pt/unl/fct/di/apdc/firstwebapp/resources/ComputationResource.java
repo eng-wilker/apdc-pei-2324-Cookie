@@ -46,7 +46,7 @@ public class ComputationResource {
 	@GET
 	@Path("/time")
 	public Response getCurrentTime(@CookieParam("session::apdc") Cookie cookie) {
-		if (!LoginResource.checkPermissions(cookie, LoginResource.ADMIN)) {
+		if (!LoginResource.checkPermissions(cookie, LoginResource.USER)) {
 			return Response.status(Status.FORBIDDEN).entity("Incorrect username or password.").build();
 		}
 

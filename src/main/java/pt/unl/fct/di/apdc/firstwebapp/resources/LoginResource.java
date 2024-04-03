@@ -1,10 +1,9 @@
 package pt.unl.fct.di.apdc.firstwebapp.resources;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
-
+import com.google.cloud.datastore.*;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -21,22 +20,22 @@ import pt.unl.fct.di.apdc.firstwebapp.util.LoginData;
 import pt.unl.fct.di.apdc.firstwebapp.Authentication.SignatureUtils;
 import pt.unl.fct.di.apdc.firstwebapp.util.UserData;
 
+import com.google.appengine.repackaged.com.google.datastore.v1.client.Datastore;
+import com.google.appengine.repackaged.com.google.datastore.v1.client.DatastoreOptions;
 import com.google.gson.Gson;
 
 @Path("/login")
 @Produces(MediaType.APPLICATION_JSON + ";charset=utf-8")
 public class LoginResource {
-
-	// Settings that must be in the database
-	public static final String ADMIN = "Admin";
-	public static final String BACKOFFICE = "Backoffice";
-	public static final String REGULAR = "Regular";
+	public static final String SU = "SU";
+	public static final String GA = "GA";
+	public static final String GBO = "GBO";
+	public static final String USER = "USER";
 	private static final String key = "dhsjfhndkjvnjdsdjhfkjdsjfjhdskjhfkjsdhfhdkjhkfajkdkajfhdkmc";
-
-	public static Map<String, UserData> users = new HashMap<String, UserData>();
-
 	private static final Logger LOG = Logger.getLogger(LoginResource.class.getName());
+	private final static Datastore datastore = DatastoreOptions.getDefaultInstance().getService();
 	private final Gson g = new Gson();
+	private static Map<String, UserData> users;
 
 	public LoginResource() {
 	}
@@ -45,26 +44,34 @@ public class LoginResource {
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response doLogin(LoginData data) {
-		LOG.fine("Login attempt by user: " + data.username);
+		LOG.fine("Attempt to login user " + data.username);
+		Key userKey = datastore.newKeyFactory().newKey(data.username);
+		Entity user = datastore.get(userKey);
+		if (user != null && checkPassword(data)) {
+			String id = UUID.randomUUID().toString();
+			long currentTime = System.currentTimeMillis();
+			long expirationTime = currentTime + 1000 * 60 * 60 * 2;
+			String role = user.getString("role");
+			String fields = data.username + "." + id + "." + role + "." + currentTime + "." + expirationTime;
 
-		if (!checkPassword(data)) {
-			return Response.status(Status.FORBIDDEN).entity("Incorrect username or password.").build();
+			String signature = SignatureUtils.calculateHMac(key, fields);
+
+			if (signature == null) {
+				return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error while signing token. See logs.")
+						.build();
+			}
+
+			String value = fields + "." + signature;
+			NewCookie cookie = new NewCookie("individual::apdc", value, "/", null, "comment", 1000 * 60 * 60 * 2,
+					false,
+					true);
+			LOG.fine("User " + data.username + " logged in successfully");
+			return Response.ok().cookie(cookie).build();
+
 		}
 
-		String id = UUID.randomUUID().toString();
-		long currentTime = System.currentTimeMillis();
-		String fields = data.username + "." + id + "." + REGULAR + "." + currentTime + "." + 1000 * 60 * 60 * 2;
-
-		String signature = SignatureUtils.calculateHMac(key, fields);
-
-		if (signature == null) {
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error while signing token. See logs.").build();
-		}
-
-		String value = fields + "." + signature;
-		NewCookie cookie = new NewCookie("session::apdc", value, "/", null, "comment", 1000 * 60 * 60 * 2, false, true);
-
-		return Response.ok().cookie(cookie).build();
+		LOG.fine("Failed login attempt for user " + data.username);
+		return Response.status(Response.Status.FORBIDDEN).entity("Incorrect username or password.").build();
 	}
 
 	public static boolean checkPermissions(Cookie cookie, String role) {
@@ -112,13 +119,13 @@ public class LoginResource {
 		int result = 0;
 
 		switch (role) {
-			case BACKOFFICE:
+			case SU:
 				result = 1;
 				break;
-			case ADMIN:
+			case GA:
 				result = 2;
 				break;
-			case REGULAR:
+			case GBO:
 				result = 0;
 				break;
 			default:
