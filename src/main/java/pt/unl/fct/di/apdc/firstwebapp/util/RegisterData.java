@@ -9,14 +9,22 @@ public class RegisterData {
     public String name;
     public String number;
     public String role;
-    public String state = "inactive";
+    public String state = "INACTIVE";
+    public String profile;
+    public String occupation;
+    public String workplace;
+    public String address;
+    public String postCode;
+    public String nif;
+    public String imagePath;
 
     public RegisterData() {
 
     }
 
     public RegisterData(String username, String password, String confirmation, String email, String name,
-            String number) {
+            String number, String occupation, String workplace, String address, String postCode, String nif,
+            String imagePath, String profile) {
         this.username = username;
         this.password = password;
         this.confirmation = confirmation;
@@ -24,31 +32,36 @@ public class RegisterData {
         this.name = name;
         this.number = number;
         this.role = "USER";
+        this.occupation = occupation;
+        this.workplace = workplace;
+        this.address = address;
+        this.postCode = postCode;
+        this.nif = nif;
+        this.imagePath = imagePath;
+        this.profile = profile.toUpperCase();
+
     }
 
     public boolean isValid() {
-        return username != null && password != null && email != null && name != null && number != null;
+        return !username.equals("") && !password.equals("") && !email.equals("") && !name.equals("")
+                && !number.equals("");
     }
 
     public boolean isEmailValid() {
-        return email != null && email.contains("@") && email.contains(".");
+        return email.contains("@") && email.contains(".");
     }
 
     public boolean isNumberValid() {
-        return number != null && number.length() == 9;
+        return number.length() == 9;
+    }
+
+    public boolean isProfileValid() {
+        return this.profile.equalsIgnoreCase("PUBLIC") || this.profile.equals("PRIVATE")|| this.profile.equalsIgnoreCase("");
     }
 
     public boolean isPasswordValid() {
-        return password != null && password.length() >= 8 && password.matches(".*\\d.*")
+        return password.length() >= 8 && password.matches(".*\\d.*")
                 && password.matches(".*[a-z].*") && password.matches(".*[A-Z].*") && password.equals(confirmation);
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public void setState(String state) {
-        this.state = state;
     }
 
 }

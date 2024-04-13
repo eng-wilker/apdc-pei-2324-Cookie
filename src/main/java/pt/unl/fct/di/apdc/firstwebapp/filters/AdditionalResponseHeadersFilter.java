@@ -10,14 +10,15 @@ import javax.ws.rs.ext.Provider;
 @Provider
 public class AdditionalResponseHeadersFilter implements ContainerResponseFilter {
 
-	public AdditionalResponseHeadersFilter() {}
-
+	public AdditionalResponseHeadersFilter() {
+	}
 
 	@Override
-	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
+	public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
+			throws IOException {
 		responseContext.getHeaders().add("Access-Control-Allow-Methods", "HEAD,GET,PUT,POST,DELETE,OPTIONS");
 		responseContext.getHeaders().add("Access-Control-Allow-Origin", "*");
-		responseContext.getHeaders().add("Access-Control-Allow-Headers", "Content-Type, X-Requested-With");   
+		responseContext.getHeaders().add("Access-Control-Allow-Headers", "origin, content-type, accept, authorization, Cookie");
 	}
 
 }

@@ -1,22 +1,21 @@
 package pt.unl.fct.di.apdc.firstwebapp.util;
 
-
 public class DeleteData {
 
     public String username;
-    public String password;
+    public String cookie;
 
     public DeleteData() {
 
     }
 
-    public DeleteData(String username, String password) {
+    public DeleteData(String username, String cookie) {
         this.username = username;
-        this.password = password;
+        this.cookie = cookie;
     }
 
     public boolean isValid() {
-        return username != null && password != null;
+        return username.equals("");
     }
 
 }

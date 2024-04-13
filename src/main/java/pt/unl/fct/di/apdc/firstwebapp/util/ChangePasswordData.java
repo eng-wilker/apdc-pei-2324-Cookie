@@ -2,24 +2,24 @@ package pt.unl.fct.di.apdc.firstwebapp.util;
 
 public class ChangePasswordData {
 
-    public String username;
     public String oldPassword;
     public String newPassword;
     public String confirmPassword;
+    public String cookie;
 
     public ChangePasswordData() {
 
     }
 
-    public ChangePasswordData(String username, String oldPassword, String newPassword, String confirmPassword) {
-        this.username = username;
+    public ChangePasswordData(String oldPassword, String newPassword, String confirmPassword, String cookie) {
         this.oldPassword = oldPassword;
         this.newPassword = newPassword;
         this.confirmPassword = confirmPassword;
+        this.cookie = cookie;
     }
 
     public boolean isValid() {
-        return username != null && oldPassword != null && newPassword != null && confirmPassword != null;
+        return oldPassword != null && newPassword != null && confirmPassword != null;
     }
 
     public boolean isPasswordValid() {

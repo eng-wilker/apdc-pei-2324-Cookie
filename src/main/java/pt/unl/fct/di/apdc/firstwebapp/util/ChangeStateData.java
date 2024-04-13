@@ -4,18 +4,20 @@ public class ChangeStateData {
 
     public String username;
     public String state;
+    public String cookie;
 
     public ChangeStateData() {
 
     }
 
-    public ChangeStateData(String username, String state) {
+    public ChangeStateData(String username, String state, String cookie) {
         this.username = username;
-        this.state = state;
+        this.state = state.toUpperCase();
+        this.cookie = cookie;
     }
 
     public boolean isValid() {
-        return username != null && state != null && (state.equals("active") || state.equals("inactive"));
+        return !username.equals("") && !state.equals("") && (state.equals("ACTIVE") || state.equals("INACTIVE"));
     }
 
 }
